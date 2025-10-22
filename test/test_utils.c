@@ -106,4 +106,8 @@ void print_byte(uint8_t byte) {
         printf("%d", get_bit(byte, i));
     printf(" ");
 }
-
+int main() {
+    uint8_t byte = 0xAB;
+    print_byte(byte);
+    return 0;
+}
