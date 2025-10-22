@@ -123,29 +123,3 @@ int main() {
     return 0;
 }
 #endif
-int main() {
-    Image img;
-
-    // Load BMP image
-    if (load_bmp("input.bmp", &img) != 0) {
-        printf("Failed to load input.bmp\n");
-        return 1;
-    }
-    printf("Loaded image %dx%d with %d channels\n", img.width, img.height, img.channels);
-
-    // (Optional) Process img.data here...
-
-    // Save BMP copy
-    if (save_bmp("copy.bmp", &img) != 0) {
-        printf("Failed to save copy.bmp\n");
-        free_image(&img);
-        return 2;
-    }
-
-    printf("Saved copy.bmp successfully\n");
-
-    // Free resources
-    free_image(&img);
-
-    return 0;
-}

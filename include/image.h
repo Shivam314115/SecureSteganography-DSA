@@ -2,34 +2,45 @@
 #define IMAGE_H
 
 #include <stdint.h>
-#include <stddef.h>
 
 // Structure representing a simple image in memory
 typedef struct {
-    uint8_t *data;      // Pixel data (contiguous row-major bytes)
+    uint8_t *data;      // Pixel data stored row-major
     int width;          // Image width in pixels
     int height;         // Image height in pixels
-    int channels;       // Channels per pixel (e.g., 1 = grayscale, 3 = RGB)
+    int channels;       // Number of color channels (1 = grayscale, 3 = RGB)
 } Image;
 
-// Load a BMP image (uncompressed, 24-bit or 8-bit grayscale)
+/**
+ * @brief Load an uncompressed 24-bit BMP image from file.
+ * @param filename Path to the BMP file
+ * @param image Pointer to an Image struct to be populated
+ * @return 0 on success, negative on failure
+ */
 int load_bmp(const char *filename, Image *image);
 
-// Save a BMP image
+/**
+ * @brief Save an Image struct as an uncompressed 24-bit BMP file.
+ * @param filename Output BMP file path
+ * @param image Pointer to the Image struct
+ * @return 0 on success, negative on failure
+ */
 int save_bmp(const char *filename, const Image *image);
 
-// Free image memory
+/**
+ * @brief Free the pixel data buffer in the Image struct.
+ * @param image Pointer to the Image struct
+ */
 void free_image(Image *image);
 
-// --- JPEG interface (if using libjpeg) ---
-// Load JPEG image data into an Image struct
+/**
+ * @brief Load a JPEG image into an Image struct (not implemented).
+ */
 int load_jpeg(const char *filename, Image *image);
 
-// Save Image struct as JPEG
+/**
+ * @brief Save an Image struct as a JPEG file with given quality (not implemented).
+ */
 int save_jpeg(const char *filename, const Image *image, int quality);
-
-// Optionally: direct access to JPEG's DCT coefficients (advanced/with libjpeg)
-// int load_jpeg_dct(const char *filename, ...);
-// int save_jpeg_dct(const char *filename, ...);
 
 #endif // IMAGE_H
