@@ -1,10 +1,7 @@
+#include "../include/image.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
 #include <string.h>
-#include "../include/image.h"
-
-// -- Minimal BMP loader for uncompressed 24-bit BMP files only --
 
 #pragma pack(push, 1)
 typedef struct {
@@ -40,29 +37,31 @@ int load_bmp(const char *filename, Image *image) {
     fread(&bfh, sizeof(bfh), 1, f);
     fread(&bih, sizeof(bih), 1, f);
 
-    if (bfh.bfType != 0x4D42) { fclose(f); return -2; }
-    if (bih.biBitCount != 24 || bih.biCompression != 0) { fclose(f); return -3; }
+    if (bfh.bfType != 0x4D42) { fclose(f); return -2; } // Not a BMP file
+    if (bih.biBitCount != 24 || bih.biCompression != 0) { fclose(f); return -3; } // Not a 24-bit uncompressed BMP
 
-    fseek(f, bfh.bfOffBits, SEEK_SET);
-
-    int row_padded = (bih.biWidth * 3 + 3) & (~3);
-    image->data = (uint8_t *)malloc(3 * bih.biWidth * abs(bih.biHeight));
     image->width = bih.biWidth;
     image->height = abs(bih.biHeight);
     image->channels = 3;
+    int image_size = image->width * image->height * image->channels;
+    image->data = (uint8_t *)malloc(image_size);
 
-    for (int y = 0; y < image->height; y++) {
-        uint8_t *row = (uint8_t*)malloc(row_padded);
-        fread(row, 1, row_padded, f);
-        for (int x = 0; x < image->width; x++) {
-            int dst_idx = (y * image->width + x) * 3;
-            int src_idx = x * 3;
-            image->data[dst_idx + 0] = row[src_idx + 2]; // R
-            image->data[dst_idx + 1] = row[src_idx + 1]; // G
-            image->data[dst_idx + 2] = row[src_idx + 0]; // B
+    fseek(f, bfh.bfOffBits, SEEK_SET);
+
+    int row_padded = (image->width * 3 + 3) & (~3);
+    uint8_t *row = (uint8_t *)malloc(row_padded);
+
+    for (int i = 0; i < image->height; i++) {
+        fread(row, sizeof(uint8_t), row_padded, f);
+        for (int j = 0; j < image->width; j++) {
+            // BMP stores pixels in BGR order, so we convert to RGB
+            image->data[(i * image->width + j) * 3 + 2] = row[j * 3 + 0];
+            image->data[(i * image->width + j) * 3 + 1] = row[j * 3 + 1];
+            image->data[(i * image->width + j) * 3 + 0] = row[j * 3 + 2];
         }
-        free(row);
     }
+
+    free(row);
     fclose(f);
     return 0;
 }
@@ -71,55 +70,49 @@ int save_bmp(const char *filename, const Image *image) {
     FILE *f = fopen(filename, "wb");
     if (!f) return -1;
 
-    int width = image->width, height = image->height;
-    int row_padded = (width * 3 + 3) & (~3);
-    int data_size = row_padded * height;
-    BITMAPFILEHEADER bfh = {0x4D42, sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + data_size, 0, 0, sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)};
-    BITMAPINFOHEADER bih = {sizeof(BITMAPINFOHEADER), width, height, 1, 24, 0, data_size, 0, 0, 0, 0};
+    int row_padded = (image->width * 3 + 3) & (~3);
+    int data_size = row_padded * image->height;
+
+    BITMAPFILEHEADER bfh = {
+        0x4D42, // "BM"
+        sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER) + data_size,
+        0, 0,
+        sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)
+    };
+
+    BITMAPINFOHEADER bih = {
+        sizeof(BITMAPINFOHEADER),
+        image->width,
+        image->height,
+        1,
+        24,
+        0,
+        data_size,
+        0, 0, 0, 0
+    };
 
     fwrite(&bfh, sizeof(bfh), 1, f);
     fwrite(&bih, sizeof(bih), 1, f);
 
-    for (int y = 0; y < height; y++) {
-        uint8_t row[row_padded];
-        memset(row, 0, row_padded);
-        for (int x = 0; x < width; x++) {
-            int src_idx = (y * width + x) * 3;
-            int dst_idx = x * 3;
-            row[dst_idx + 2] = image->data[src_idx + 0]; // B
-            row[dst_idx + 1] = image->data[src_idx + 1]; // G
-            row[dst_idx + 0] = image->data[src_idx + 2]; // R
+    uint8_t *row = (uint8_t *)malloc(row_padded);
+
+    for (int i = 0; i < image->height; i++) {
+        for (int j = 0; j < image->width; j++) {
+            // Convert back to BGR for BMP file
+            row[j * 3 + 0] = image->data[(i * image->width + j) * 3 + 2];
+            row[j * 3 + 1] = image->data[(i * image->width + j) * 3 + 1];
+            row[j * 3 + 2] = image->data[(i * image->width + j) * 3 + 0];
         }
-        fwrite(row, 1, row_padded, f);
+        fwrite(row, sizeof(uint8_t), row_padded, f);
     }
+
+    free(row);
     fclose(f);
     return 0;
 }
 
 void free_image(Image *image) {
-    if (image->data) free(image->data);
-    image->data = NULL;
-}
-
-// ---- Minimal test main ----
-#ifdef TEST_IMAGE_MAIN
-int main() {
-    Image img;
-    if (load_bmp("input.bmp", &img) != 0) {
-        printf("Failed to load input.bmp\n");
-        return 1;
+    if (image && image->data) {
+        free(image->data);
     }
-    printf("Loaded: %dx%d\n", img.width, img.height);
-
-    // [OPTIONAL: Do something with img.data here]
-
-    if (save_bmp("copy.bmp", &img) != 0) {
-        printf("Failed to save copy.bmp\n");
-        free_image(&img);
-        return 2;
-    }
-    printf("Saved copy.bmp\n");
-    free_image(&img);
-    return 0;
 }
-#endif

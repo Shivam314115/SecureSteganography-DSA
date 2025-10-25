@@ -33,14 +33,4 @@ int save_bmp(const char *filename, const Image *image);
  */
 void free_image(Image *image);
 
-/**
- * @brief Load a JPEG image into an Image struct (not implemented).
- */
-int load_jpeg(const char *filename, Image *image);
-
-/**
- * @brief Save an Image struct as a JPEG file with given quality (not implemented).
- */
-int save_jpeg(const char *filename, const Image *image, int quality);
-
 #endif // IMAGE_H

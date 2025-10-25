@@ -6,10 +6,6 @@
 
 // Metadata structure for steganography header
 typedef struct {
-    uint8_t type;
-    uint8_t redundancy;
-} ECCParams;
-typedef struct {
     uint32_t message_length;     // Length of secret message in bytes
     uint32_t prng_seed;          // Seed for pseudo-random coefficient selection
     uint8_t ecc_type;            // Type of ECC used (0=none, 1=repetition, 2=Reed-Solomon)
@@ -46,8 +42,7 @@ int embedMessage(const StegoParams *params);
  * @param max_length Maximum length of output buffer.
  * @return Number of bytes extracted on success, -1 on failure.
  */
-int extractMessage(const char *stego_image_path, uint32_t key, 
-                   char *output_message, size_t max_length);
+int extractMessage(const char *stego_image_path, char *output_message, size_t max_length);
 
 /**
  * Estimate embedding capacity of an image in bytes.

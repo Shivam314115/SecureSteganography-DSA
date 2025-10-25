@@ -1,0 +1,226 @@
+Perfect, Shivam 👍 — let’s go step-by-step so you clearly understand what **each file** in your Secure Steganography (DSA) project does and **how it all connects**.
+
+I’ll explain **every single file** — line by line in concept — so you’ll never get confused again about what belongs where.
+
+---
+
+## 🧠 PROJECT OVERVIEW
+
+Your project is called **Secure Steganography (DSA)**.
+It hides secret text messages inside images by converting text into binary, encrypting it with XOR, and embedding it in image bits.
+
+You’ve structured your project professionally, just like a real-world C software project — with **include**, **src**, and **test** folders.
+
+---
+
+## 📁 FILE STRUCTURE & EXPLANATION
+
+### 1️⃣ **`include/utils.h` — Header File (Function Declarations)**
+
+📍 **Purpose:**
+This file tells the compiler what functions exist (their names, parameters, and return types) before they are used in other `.c` files.
+
+📍 **What it does:**
+
+* Acts as the **interface** between your main code (`main.c` or test files) and your utility code (`utils.c`).
+* It contains only **function declarations**, not actual code.
+* It includes Doxygen-style comments to explain what each function does (useful for documentation).
+
+📍 **Example functions inside:**
+
+```c
+uint8_t get_bit(uint8_t byte, int position);
+void set_bit(uint8_t *byte, int position, uint8_t value);
+void char_to_binary(uint8_t c, uint8_t binary[8]);
+uint8_t binary_to_char(uint8_t binary[8]);
+uint8_t xor_encrypt(uint8_t data, uint8_t key);
+void text_to_binary(const char *text, uint8_t *binary, int length);
+void binary_to_text(const uint8_t *binary, char *text, int length);
+void print_byte(uint8_t byte);
+```
+
+📍 **Think of it like:**
+A **menu card** in a restaurant — it lists all available dishes (functions), but doesn’t show how they are cooked (that’s `utils.c`).
+
+---
+
+### 2️⃣ **`src/utils.c` — Source File (Function Definitions)**
+
+📍 **Purpose:**
+This is where you actually **write the code (logic)** for all the functions declared in `utils.h`.
+
+📍 **What it does:**
+
+* Defines how each function works internally.
+* Implements bit manipulation, binary conversions, and encryption.
+
+📍 **Example Function Logic:**
+
+```c
+uint8_t get_bit(uint8_t byte, int position) {
+    return (byte >> position) & 1;
+}
+```
+
+This extracts a single bit (0 or 1) from a byte.
+
+📍 **Functions inside do:**
+
+* **get_bit:** Extracts a bit (0 or 1) from a byte.
+* **set_bit:** Changes one bit in a byte to 0 or 1.
+* **char_to_binary:** Converts a character (like ‘A’) into binary (8 bits).
+* **binary_to_char:** Converts those 8 bits back into a character.
+* **xor_encrypt:** Encrypts or decrypts data using XOR logic.
+* **text_to_binary:** Converts a whole string into binary bits.
+* **binary_to_text:** Converts binary bits back into readable text.
+* **print_byte:** Prints bits for debugging, e.g. `01010101`.
+
+📍 **Think of it like:**
+The **kitchen** where you cook the dishes (functions) that were listed in the `utils.h` menu.
+
+---
+
+### 3️⃣ **`src/main.c` — Main Program (Driver Code)**
+
+📍 **Purpose:**
+This is the **heart** of your project — where everything comes together.
+You call functions from `utils.c` here to perform the **steganography workflow**.
+
+📍 **What it does:**
+
+1. Takes input text (the secret message).
+2. Converts it to binary.
+3. Encrypts it using XOR with a key.
+4. Embeds the bits into an image (using LSB steganography).
+5. Extracts and decrypts the message back.
+
+📍 **Typical structure:**
+
+```c
+#include "utils.h"
+#include <stdio.h>
+
+int main() {
+    char message[] = "HELLO";
+    uint8_t binary[8 * sizeof(message)];
+    
+    text_to_binary(message, binary, sizeof(message));
+    // Further embedding and extraction logic here...
+}
+```
+
+📍 **Think of it like:**
+The **manager** who gives orders to the kitchen (`utils.c`) based on the menu (`utils.h`).
+
+---
+
+### 4️⃣ **`test/test_utils.c` — Testing File**
+
+📍 **Purpose:**
+This is used to **verify** that your utility functions work correctly before integrating them into the main program.
+
+📍 **What it does:**
+
+* Checks if text converts to binary and back correctly.
+* Verifies that XOR encryption and decryption are symmetric (undo each other).
+* Tests bit extraction and setting.
+
+📍 **Example:**
+
+```c
+#include "../include/utils.h"
+#include <stdio.h>
+
+int main() {
+    char text[] = "TEST";
+    uint8_t binary[32];
+    char result[5];
+
+    text_to_binary(text, binary, 4);
+    binary_to_text(binary, result, 4);
+
+    printf("Original: %s\n", text);
+    printf("Recovered: %s\n", result);
+    return 0;
+}
+```
+
+📍 **Think of it like:**
+A **taste tester** who checks whether your kitchen’s dishes (functions) are correct before serving them.
+
+---
+
+### 5️⃣ **`images/` Folder**
+
+📍 **Purpose:**
+To store input and output image files.
+
+📍 **Files inside:**
+
+* `input.bmp` → The original image before hiding any message.
+* `encoded.bmp` → The image after hiding the secret message.
+* `decoded_output.txt` → The text file with the extracted hidden message.
+
+📍 **Think of it like:**
+The **plates** on which your dishes (steganography results) are served.
+
+---
+
+### 6️⃣ **`.vscode/` Folder**
+
+📍 **Purpose:**
+Contains configuration files (`tasks.json`, `launch.json`) that make it easier to compile and run your project automatically inside VS Code.
+
+📍 **What it does:**
+
+* Allows you to press **Ctrl+Shift+B** to build your project automatically.
+* Ensures GCC compiles all required `.c` files together.
+
+📍 **Think of it like:**
+A **kitchen timer and setup** — makes your workflow smoother.
+
+---
+
+### 7️⃣ **`README.md`**
+
+📍 **Purpose:**
+Documentation file for your project (like a report).
+
+📍 **What it does:**
+
+* Explains what your project does.
+* Lists dependencies, setup steps, and usage instructions.
+* Helps others (or your professor) understand your work quickly.
+
+📍 **Think of it like:**
+The **recipe book** describing how everything in your project works together.
+
+---
+
+### 8️⃣ **`output/` Folder (inside test or src)**
+
+📍 **Purpose:**
+Stores your compiled binaries (`.exe` or `test` files).
+Keeps your folder clean so source files and compiled files don’t mix.
+
+📍 **Think of it like:**
+The **final food delivery area** — where finished dishes are placed.
+
+---
+
+## 🔗 How Everything Works Together
+
+| Step | File Involved  | What Happens                                         |
+| ---- | -------------- | ---------------------------------------------------- |
+| 1    | `main.c`       | You write your main logic calling utility functions. |
+| 2    | `utils.h`      | Compiler knows which functions exist (declarations). |
+| 3    | `utils.c`      | Functions actually execute the logic.                |
+| 4    | `test_utils.c` | You test that your utils work before using them.     |
+| 5    | `images/`      | Used for hiding/extracting text.                     |
+| 6    | `.vscode/`     | Makes compilation easier.                            |
+| 7    | `README.md`    | Documents everything.                                |
+
+---
+
+Would you like me to create a **visual flowchart (in image format)** showing how all these files interact — like `main.c → utils.h → utils.c → images` — in the same style as the ones you like?
+It would be perfect for including in your report or README.

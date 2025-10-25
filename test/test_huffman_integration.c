@@ -1,11 +1,12 @@
 #include "../include/stego.h"
+#include "../include/huffman.h"
 #include "../include/utils.h"
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
 
 int main() {
-    char secret_message[] = "This is a secret message.";
+    char secret_message[] = "This is a longer test message to see if the Huffman coding works correctly.";
     char extracted_message[100];
 
     StegoParams params = {
@@ -16,17 +17,19 @@ int main() {
         .key = 12345
     };
 
+    // Embed the message using Huffman coding
     int result = embedMessage(&params);
     assert(result == 0);
     printf("Message embedded successfully.\n");
 
-    result = extractMessage(params.stego_image_path, extracted_message, params.message_length);
+    // Extract the message
+    result = extractMessage(params.stego_image_path, extracted_message, sizeof(extracted_message));
     assert(result > 0);
     extracted_message[result] = '\0';
     printf("Message extracted: %s\n", extracted_message);
 
     assert(strcmp(secret_message, extracted_message) == 0);
-    printf("Stego test passed!\n");
+    printf("Huffman integration test passed!\n");
 
     return 0;
 }
