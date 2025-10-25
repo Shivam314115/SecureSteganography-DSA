@@ -6,6 +6,7 @@
 
 // Block size for JPEG (8x8)
 #define DCT_BLOCK_SIZE 8
+typedef double DCTBlock[DCT_BLOCK_SIZE][DCT_BLOCK_SIZE];
 
 /**
  * @brief Forward 2D DCT on a single 8x8 block of image data (in-place or output buffer).
