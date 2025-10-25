@@ -1,0 +1,14 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run Steganography",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/output/steganography",
+            "preLaunchTask": "build project",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "lldb"
+        }
+    ]
+}
